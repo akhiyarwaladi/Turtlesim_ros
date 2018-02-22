@@ -6,7 +6,7 @@ import math
 def move_straight(speed, distance, isForward):
   velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
   vel_msg = Twist()
-  rate = rospy.Rate(10)
+  rate = rospy.Rate(100)
   # cek apakah akan pindah lurus maju atau mundur
   if(isForward):
     vel_msg.linear.x = abs(speed)
@@ -39,20 +39,21 @@ def move_straight(speed, distance, isForward):
   velocity_publisher.publish(vel_msg)
   rate.sleep()
 
-def move_rotate(speed, angle, clockwise):
+def move_rotate(speed, angle,clockwise):
   velocity_publisher_rotate = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
   vel_msg_rotate = Twist()
-  rate = rospy.Rate(10)
+  rate = rospy.Rate(100)
   #Converting from angles to radians
   angular_speed = speed * math.pi / 180.0
   relative_angle = angle * math.pi / 180.0
   # Checking if our movement is CW or CCW
 
-  if clockwise:
-    vel_msg_rotate.angular.z = -abs(angular_speed)
+  if (clockwise): 
+    vel_msg_rotate.angular.z = math.fabs(angular_speed)
+    # Setting the current time for distance calculus
   else:
-    vel_msg_rotate.angular.z = abs(angular_speed)
-  # Setting the current time for distance calculus
+    vel_msg_rotate.angular.z = -math.fabs(angular_speed)
+
   t0 = rospy.Time.now().to_sec()
   current_angle = 0
 
@@ -77,11 +78,11 @@ def move_circle():
   # Create a Twist message and add linear x and angular z values
   move_cmd = Twist()
   move_cmd.linear.x = 1.0
-  move_cmd.angular.z = 1.0
+  move_cmd.angular.z = -1.0
 
   # Save current time and set publish rate at 10 Hz
   now = rospy.Time.now()
-  rate = rospy.Rate(10)
+  rate = rospy.Rate(100)
 
   # For the next 6 seconds publish cmd_vel move commands to Turtlesim
   while rospy.Time.now() < now + rospy.Duration.from_sec(6):
@@ -97,20 +98,26 @@ def move():
 
   rate = rospy.Rate(10)
   while not rospy.is_shutdown():
+
+    print("Let's rotate for the first direction")
+    move_rotate (40, 90,1);
  
     i = 0
     while(i < 4):
 
       print("Let's move your robot")
-      move_straight (2, 3, 1);
+      move_straight (5, 3, 1);
       
-
       print("Let's rotate your robot")
-      move_rotate (20, 90, 1);
+      move_rotate (40, 90,0);
+
       i = i+1
-    
+       
     print("Let's move circle")
     move_circle()
+
+    print("Let's rotate for the direction")
+    move_rotate (20, 100, 0);
 
   rospy.spin()
   
